@@ -7,20 +7,19 @@ real normal_lnorm(real theta, real tau, real sigma,
                   array[] real alpha, vector eta) {
   int k = size(alpha);
   real cutoff;
-  real lcdf;
+  real cdf;
   array[k - 1] real summands;
-  vector[k] log_eta = log(eta);
 
-  summands[1] = log_eta[1];
+  summands[1] = eta[1];
 
   for(i in 2:(k - 1)) {
     cutoff = inv_Phi(1 - alpha[i])*sigma;
-    lcdf = normal_lcdf(cutoff | theta, sqrt(tau * tau + sigma * sigma));
-    summands[i] = lcdf + log_diff_exp(log_eta[i], log_eta[i - 1]);
+    cdf = exp(normal_lcdf(cutoff | theta, sqrt(tau * tau + sigma * sigma)));
+    summands[i] = cdf*(eta[i] - eta[i - 1]);
   }
 
 
-  return(log_sum_exp(summands));
+  return(log(sum(summands)));
 }
 
 // Both the prior and likelihood make use of the same normalizing constant from
